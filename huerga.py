@@ -65,6 +65,10 @@ class Detector:
                     cv2.rectangle(frame, (person[0], person[1]), (person[2], person[3]), green, 2)
                     cv2.putText(frame, f'{0}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, green, 2)
                 else:
+                    '''
+                    TODO:
+                    additional classifier
+                    '''
                     cv2.rectangle(frame, (person[0], person[1]), (person[2], person[3]), red, 2)
                     cv2.putText(frame, f'{0}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, red, 2)
         return frame       
@@ -75,11 +79,14 @@ class Main:
         self.camera = Camera()
         self.detector = Detector()
         generator=self.camera.get_images()
+        i = 0
         while True:
             try:
                 detected_frame = self.detector.detection(next(generator))
                 cv2.imshow('image', detected_frame)
-                cv2.waitKey(3000)
+                cv2.imwrite(f'results/{i}.jpg', detected_frame)
+                i+=1
+                cv2.waitKey(1)
             except StopIteration:
                 break
 
