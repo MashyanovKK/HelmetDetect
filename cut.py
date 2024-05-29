@@ -7,6 +7,6 @@ while True:
     ret,frame = cap.read()
     if not ret:
         break
-    cv2.imwrite(f'images_from_video_{i}.jpg',frame)
+    cv2.imwrite(f'images_from_video/{i}.jpg',frame)
     cv2.waitKey(1)
     i+=1
