@@ -9,3 +9,4 @@ while True:
         break
     cv2.imwrite(f'images_from_video_{i}.jpg',frame)
     cv2.waitKey(1)
+    i+=1
