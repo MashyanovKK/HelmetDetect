@@ -1,5 +1,4 @@
 from ultralytics import YOLO
-from deep_sort_realtime.deepsort_tracker import DeepSort
 import cv2
 import numpy as np
 import os
