@@ -131,7 +131,6 @@ class Main:
                 self.resultVideo.release()
                 break
             self.get_detection(frame)
-              # Ожидаем 1 секунду
         cv2.destroyAllWindows()
 
     def get_detection(self, frame):
