@@ -22,6 +22,13 @@ class Camera:
         for i in self.images:
             yield cv2.imread(f'images/{i}')
 
+class Video:
+    def __init__(self, path):
+        self.capture = cv2.VideoCapture(path)
+
+    def get_frame(self):
+        ret,frame = self.capture.read()
+        return frame if ret else False
 
 # Класс Detector для детекции объектов на изображениях
 class Detector:
@@ -93,21 +100,47 @@ class Detector:
 
 # Класс Main для запуска основного процесса
 class Main:
-    def __init__(self):
+    def __init__(self, path=None):
         self.camera = Camera()  # Инициализация камеры
         self.detector = Detector()  # Инициализация детектора
-        generator = self.camera.get_images()  # Получаем генератор изображений
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        self.resultVideo = cv2.VideoWriter('output.avi', fourcc, 30.0, (1280, 720))
+          # Получаем генератор изображений
+        
+        if path is None:
+            self.frames_spin()
+        else:
+            self.video = Video(path)  # Инициализация видео
+            self.video_spin()  # Запускаем процесс детекции
+        
+    def frames_spin(self):
+        self.generator = self.camera.get_images()
         i = 0
         while True:
             try:
-                detected_frame = self.detector.detection(next(generator))  # Детекция объектов на следующем кадре
-                cv2.imshow('image', detected_frame)  # Отображаем изображение
-                cv2.imwrite(f'results/{i}.jpg', detected_frame)  # Сохраняем результат
-                i += 1
-                cv2.waitKey(1000)  # Ожидаем 1 секунду
+                self.get_detection(next(self.generator))  # Детекция объектов на следующем кадре
             except StopIteration:
+                self.resultVideo.release()
                 break  # Завершаем цикл, когда изображения заканчиваются
+        cv2.destroyAllWindows()
+    def video_spin(self):
 
+        while True:
+            frame = self.video.get_frame()
+            if not frame:
+                self.resultVideo.release()
+                break
+            self.get_detection(frame)
+              # Ожидаем 1 секунду
+        cv2.destroyAllWindows()
+
+    def get_detection(self, frame):
+        detected_frame = self.detector.detection(frame)  # Детекция объектов на следующем кадре
+        cv2.imshow('image', detected_frame)  # Отображаем изображение
+        cv2.imwrite(f'results/{i}.jpg', detected_frame)
+        self.resultVideo.write(detected_frame)  # Сохраняем результат
+        i += 1
+        cv2.waitKey(1)
 # Точка входа в программу
 if __name__ == '__main__':
     main = Main()
