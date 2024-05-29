@@ -51,7 +51,7 @@ class Detector:
             if class_id == 1:
                 # Рисуем прямоугольник вокруг обнаруженной каски и добавляем текст
                 cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (255, 0, 0), 2)
-                cv2.putText(frame, f'{self.keyDict[class_id]}, confidence: {data[4]}', (xmin, ymin), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+                cv2.putText(frame, f'{self.keyDict[class_id]}, confidence: {round(float(data[4]),2)}', (xmin, ymin), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
         frame = self.analyze(frame, results)
         return frame
 
@@ -79,7 +79,7 @@ class Detector:
                 if helmetCenter[0] >= person[0] and helmetCenter[0] <= person[2] and helmetCenter[1] >= person[1] and helmetCenter[1] <= person[3]:
                     # Если каска находится внутри прямоугольника человека, рисуем зеленый прямоугольник
                     cv2.rectangle(frame, (person[0], person[1]), (person[2], person[3]), green, 2)
-                    cv2.putText(frame, f'{self.keyDict[0]}, confidence: {person[4]}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, green, 2)
+                    cv2.putText(frame, f'{self.keyDict[0]}, confidence: {round(float(person[4]),2)}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, green, 2)
                 else:
                     # Если каска не находится внутри прямоугольника человека, рисуем красный прямоугольник и запускаем дополнительный классификатор YOLO
                     helmet_frame = frame[person[1]:person[3], person[0]:person[2]]  # Извлекаем регион интереса (ROI)
@@ -89,12 +89,12 @@ class Detector:
                         if helmet_data[4] >= self.CONFIDENCE_THRESHOLD and int(helmet_data[5]) == 1:
                             # Если каска найдена в ROI, рисуем зеленый прямоугольник
                             cv2.rectangle(frame, (person[0], person[1]), (person[2], person[3]), green, 2)
-                            cv2.putText(frame, f'{self.keyDict[0]}, confidence: {person[4]}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, green, 2)
+                            cv2.putText(frame, f'{self.keyDict[0]}, confidence: {round(float(person[4]),2)}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, green, 2)
                             break
                     else:
                         # Если каска не найдена, рисуем красный прямоугольник
                         cv2.rectangle(frame, (person[0], person[1]), (person[2], person[3]), red, 2)
-                        cv2.putText(frame, f'{self.keyDict[0]}, confidence: {person[4]}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, red, 2)
+                        cv2.putText(frame, f'{self.keyDict[0]}, confidence: {round(float(person[4]),2)}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, red, 2)
         return frame       
 
 
