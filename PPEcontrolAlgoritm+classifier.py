@@ -144,4 +144,4 @@ class Main:
         cv2.waitKey(1)
 # Точка входа в программу
 if __name__ == '__main__':
-    main = Main('1_cut.mp4')
+    main = Main()
