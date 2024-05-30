@@ -2,11 +2,11 @@
 /.pycache/
 /.env/
 /.vs/
-/images_from_video/
-/images_from_video1/
-/annotation/
+images_from_video/
+images_from_video1/
+annotation/
 *.mp4
-/images/
-/results/
+images/
+results/
 *.avi
 
