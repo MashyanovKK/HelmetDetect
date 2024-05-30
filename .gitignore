@@ -1,12 +1,12 @@
-/.venv
-/.pycache
-/.env
-/.vs
-/images_from_video
-/images_from_video1
-/annotation
+/.venv/
+/.pycache/
+/.env/
+/.vs/
+/images_from_video/
+/images_from_video1/
+/annotation/
 *.mp4
-/images
-/results
+/images/
+/results/
 *.avi
 
