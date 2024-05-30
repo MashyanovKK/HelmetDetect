@@ -63,7 +63,7 @@ class Detector:
             # Если каски не обнаружены, рисуем красные прямоугольники вокруг всех людей
             for i in detections[0]:
                 cv2.rectangle(frame, (i[0], i[1]), (i[2], i[3]), red, 2)
-                cv2.putText(frame, f'{self.keyDict[0]}, confidence: {i[4]}', (i[0], i[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, red, 2)
+                cv2.putText(frame, f'{self.keyDict[0]}, confidence: {round(float(i[4]),2)}', (i[0], i[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, red, 2)
         else:
             for person in detections[0]:
                 helmets = []
