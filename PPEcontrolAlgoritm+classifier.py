@@ -98,14 +98,20 @@ class Detector:
                 else:
                     # Если каска не находится внутри прямоугольника человека, рисуем красный прямоугольник и запускаем дополнительный классификатор YOLO
                     helmet_frame = frame[person[1]:person[3], person[0]:person[2]]  # Извлекаем регион интереса (ROI)
+                    helmet_frame_height,helmet_frame_width  = helmet_frame.shape[:2]
+
+                    person = [0,0,helmet_frame_width, helmet_frame_height]
                     helmet_detections = self.model(helmet_frame, verbose=False)[0]  # Выполняем детекцию на ROI
                     helmet_detected = helmet_detections.boxes.data.tolist()
                     for helmet_data in helmet_detected:
                         if helmet_data[4] >= self.CONFIDENCE_THRESHOLD and int(helmet_data[5]) == 1:
                             # Если каска найдена в ROI, рисуем зеленый прямоугольник
-                            cv2.rectangle(frame, (person[0], person[1]), (person[2], person[3]), green, 2)
-                            cv2.putText(frame, f'{self.keyDict[0]}, confidence: {round(float(person[4]),2)}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, green, 2)
-                            break
+                            xmin, ymin, xmax, ymax = int(helmet_data[0]), int(helmet_data[1]), int(helmet_data[2]), int(helmet_data[3])
+                            helmetCenter = (xmin+ (xmax -xmin) / 2, ymin + (ymax - ymin) / 2)
+                            if self.check_top(person, helmetCenter):
+                                cv2.rectangle(frame, (person[0], person[1]), (person[2], person[3]), green, 2)
+                                cv2.putText(frame, f'{self.keyDict[0]}, confidence: {round(float(person[4]),2)}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, green, 2)
+                                break
                     else:
                         # Если каска не найдена, рисуем красный прямоугольник
                         cv2.rectangle(frame, (person[0], person[1]), (person[2], person[3]), red, 2)
