@@ -128,7 +128,7 @@ class Main:
         i = 0
         while True:
             frame = self.video.get_frame()
-            if not frame:
+            if frame is False:
                 self.resultVideo.release()
                 break
             self.get_detection(frame, i)
@@ -144,4 +144,4 @@ class Main:
         cv2.waitKey(1)
 # Точка входа в программу
 if __name__ == '__main__':
-    main = Main()
+    main = Main('1_cut.mp4')
