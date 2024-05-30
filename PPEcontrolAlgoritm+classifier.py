@@ -118,22 +118,24 @@ class Main:
         i = 0
         while True:
             try:
-                self.get_detection(next(self.generator))  # Детекция объектов на следующем кадре
+                self.get_detection(next(self.generator), i) # Детекция объектов на следующем кадре
+                i+=1 
             except StopIteration:
                 self.resultVideo.release()
                 break  # Завершаем цикл, когда изображения заканчиваются
         cv2.destroyAllWindows()
     def video_spin(self):
-
+        i = 0
         while True:
             frame = self.video.get_frame()
             if not frame:
                 self.resultVideo.release()
                 break
-            self.get_detection(frame)
+            self.get_detection(frame, i)
+            i+=1
         cv2.destroyAllWindows()
 
-    def get_detection(self, frame):
+    def get_detection(self, frame, i):
         detected_frame = self.detector.detection(frame)  # Детекция объектов на следующем кадре
         cv2.imshow('image', detected_frame)  # Отображаем изображение
         cv2.imwrite(f'results/{i}.jpg', detected_frame)
