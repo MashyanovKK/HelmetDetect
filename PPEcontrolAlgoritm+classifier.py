@@ -55,6 +55,21 @@ class Detector:
         frame = self.analyze(frame, results)
         return frame
 
+    def check_top(self, person, hatCenter):
+        xmin, ymin, xmax, ymax = person[0], person[1], person[2], person[3]
+        personCenter = [xmin + (xmax-xmin)/2, ymin + (ymax-ymin)/2]
+        hatDist = ((hatCenter[0]+personCenter[0])**2+(hatCenter[1]+personCenter[1])**2)**0.5
+        width = xmax-xmin
+        height = ymax-ymin
+        minDim = min(width, height)
+        if hatDist <= minDim*0.4:
+            return True
+        
+        if (hatCenter[1] > personCenter[1]) and abs(hatCenter[0]-personCenter[0]) < minDim*0.2:
+            return True
+        
+        return False
+
     def analyze(self, frame, detections):
         # Анализируем детекции для определения, носит ли человек каску
         red = (0, 0, 255)
@@ -76,7 +91,7 @@ class Detector:
                 helmets = sorted(helmets, key=lambda x: x[5], reverse=False)
                 helmet = helmets[0]
                 helmetCenter = (helmet[0] + (helmet[2] - helmet[0]) / 2, helmet[1] + (helmet[3] - helmet[1]) / 2)
-                if helmetCenter[0] >= person[0] and helmetCenter[0] <= person[2] and helmetCenter[1] >= person[1] and helmetCenter[1] <= person[3]:
+                if (helmetCenter[0] >= person[0] and helmetCenter[0] <= person[2] and helmetCenter[1] >= person[1] and helmetCenter[1] <= person[3]) and (self.check_top(person, helmetCenter)):
                     # Если каска находится внутри прямоугольника человека, рисуем зеленый прямоугольник
                     cv2.rectangle(frame, (person[0], person[1]), (person[2], person[3]), green, 2)
                     cv2.putText(frame, f'{self.keyDict[0]}, confidence: {round(float(person[4]),2)}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, green, 2)
