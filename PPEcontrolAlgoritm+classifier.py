@@ -22,6 +22,13 @@ class Camera:
         for i in self.images:
             yield cv2.imread(f'images/{i}')
 
+class Video:
+    def __init__(self, path):
+        self.capture = cv2.VideoCapture(path)
+
+    def get_frame(self):
+        ret,frame = self.capture.read()
+        return frame if ret else False
 
 # Класс Detector для детекции объектов на изображениях
 class Detector:
@@ -44,7 +51,7 @@ class Detector:
             if class_id == 1:
                 # Рисуем прямоугольник вокруг обнаруженной каски и добавляем текст
                 cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (255, 0, 0), 2)
-                cv2.putText(frame, f'{self.keyDict[class_id]}, confidence: {data[4]}', (xmin, ymin), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+                cv2.putText(frame, f'{self.keyDict[class_id]}, confidence: {round(float(data[4]),2)}', (xmin, ymin), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
         frame = self.analyze(frame, results)
         return frame
 
@@ -72,7 +79,7 @@ class Detector:
                 if helmetCenter[0] >= person[0] and helmetCenter[0] <= person[2] and helmetCenter[1] >= person[1] and helmetCenter[1] <= person[3]:
                     # Если каска находится внутри прямоугольника человека, рисуем зеленый прямоугольник
                     cv2.rectangle(frame, (person[0], person[1]), (person[2], person[3]), green, 2)
-                    cv2.putText(frame, f'{self.keyDict[0]}, confidence: {person[4]}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, green, 2)
+                    cv2.putText(frame, f'{self.keyDict[0]}, confidence: {round(float(person[4]),2)}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, green, 2)
                 else:
                     # Если каска не находится внутри прямоугольника человека, рисуем красный прямоугольник и запускаем дополнительный классификатор YOLO
                     helmet_frame = frame[person[1]:person[3], person[0]:person[2]]  # Извлекаем регион интереса (ROI)
@@ -82,32 +89,57 @@ class Detector:
                         if helmet_data[4] >= self.CONFIDENCE_THRESHOLD and int(helmet_data[5]) == 1:
                             # Если каска найдена в ROI, рисуем зеленый прямоугольник
                             cv2.rectangle(frame, (person[0], person[1]), (person[2], person[3]), green, 2)
-                            cv2.putText(frame, f'{self.keyDict[0]}, confidence: {person[4]}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, green, 2)
+                            cv2.putText(frame, f'{self.keyDict[0]}, confidence: {round(float(person[4]),2)}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, green, 2)
                             break
                     else:
                         # Если каска не найдена, рисуем красный прямоугольник
                         cv2.rectangle(frame, (person[0], person[1]), (person[2], person[3]), red, 2)
-                        cv2.putText(frame, f'{self.keyDict[0]}, confidence: {person[4]}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, red, 2)
+                        cv2.putText(frame, f'{self.keyDict[0]}, confidence: {round(float(person[4]),2)}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, red, 2)
         return frame       
 
 
 # Класс Main для запуска основного процесса
 class Main:
-    def __init__(self):
+    def __init__(self, path=None):
         self.camera = Camera()  # Инициализация камеры
         self.detector = Detector()  # Инициализация детектора
-        generator = self.camera.get_images()  # Получаем генератор изображений
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        self.resultVideo = cv2.VideoWriter('output.avi', fourcc, 30.0, (1280, 720))
+          # Получаем генератор изображений
+        
+        if path is None:
+            self.frames_spin()
+        else:
+            self.video = Video(path)  # Инициализация видео
+            self.video_spin()  # Запускаем процесс детекции
+        
+    def frames_spin(self):
+        self.generator = self.camera.get_images()
         i = 0
         while True:
             try:
-                detected_frame = self.detector.detection(next(generator))  # Детекция объектов на следующем кадре
-                cv2.imshow('image', detected_frame)  # Отображаем изображение
-                cv2.imwrite(f'results/{i}.jpg', detected_frame)  # Сохраняем результат
-                i += 1
-                cv2.waitKey(1000)  # Ожидаем 1 секунду
+                self.get_detection(next(self.generator))  # Детекция объектов на следующем кадре
             except StopIteration:
+                self.resultVideo.release()
                 break  # Завершаем цикл, когда изображения заканчиваются
+        cv2.destroyAllWindows()
+    def video_spin(self):
 
+        while True:
+            frame = self.video.get_frame()
+            if not frame:
+                self.resultVideo.release()
+                break
+            self.get_detection(frame)
+        cv2.destroyAllWindows()
+
+    def get_detection(self, frame):
+        detected_frame = self.detector.detection(frame)  # Детекция объектов на следующем кадре
+        cv2.imshow('image', detected_frame)  # Отображаем изображение
+        cv2.imwrite(f'results/{i}.jpg', detected_frame)
+        self.resultVideo.write(detected_frame)  # Сохраняем результат
+        i += 1
+        cv2.waitKey(1)
 # Точка входа в программу
 if __name__ == '__main__':
     main = Main()
