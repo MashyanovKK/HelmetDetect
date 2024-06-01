@@ -13,14 +13,14 @@ class Camera:
 
     def get_images_list(self):
         # Получаем список файлов в директории 'images', исключая текстовые файлы
-        files = os.listdir('images')
+        files = os.listdir('images_cut')
         files = [i for i in files if i.find('.txt') == -1]
         self.images = files
     
     def get_images(self):
         # Генератор для чтения изображений из списка
         for i in self.images:
-            yield cv2.imread(f'images/{i}')
+            yield cv2.imread(f'images_cut/{i}')
 
 class Video:
     def __init__(self, path):
@@ -33,7 +33,7 @@ class Video:
 # Класс Detector для детекции объектов на изображениях
 class Detector:
     def __init__(self):
-        self.model = YOLO("best.pt")  # Загружаем модель YOLO
+        self.model = YOLO("best_tochno.pt")  # Загружаем модель YOLO
         self.CONFIDENCE_THRESHOLD = 0.7  # Устанавливаем порог уверенности для детекции
         self.keyDict = {0: 'person', 1: 'helmet'}  # Словарь классов объектов
 
