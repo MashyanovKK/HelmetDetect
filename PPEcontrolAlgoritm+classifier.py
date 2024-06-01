@@ -55,23 +55,23 @@ class Detector:
         frame = self.analyze(frame, results)
         return frame
 
-    def check_top(self, person, hatCenter):
+    def check_top(self, person, helmetCenter):
         
         xmin, ymin, xmax, ymax = person[0], person[1], person[2], person[3]
 
         personCenter = [xmin + (xmax-xmin)/2, ymin + (ymax-ymin)/2]
-        # print(personCenter, hatCenter)
-        hatDist = ((hatCenter[0]-personCenter[0])**2 + (hatCenter[1]-personCenter[1])**2)**0.5
-        # print(hatDist)
+        # print(personCenter, helmetCenter)
+        helmetDist = ((helmetCenter[0]-personCenter[0])**2 + (helmetCenter[1]-personCenter[1])**2)**0.5
+        # print(helmetDist)
         width = xmax-xmin
         height = ymax-ymin
         minDim = min(width, height)
         maxDim = max(width, height)
         
-        if hatDist <= (minDim/2)*0.4:
+        if helmetDist <= (minDim/2)*0.4:
             return True
         
-        if (hatCenter[1] < personCenter[1]) and (abs(hatCenter[1]-personCenter[1]) >= (maxDim/2)*0.3):
+        if (helmetCenter[1] < personCenter[1]) and (abs(helmetCenter[1]-personCenter[1]) >= (maxDim/2)*0.3):
             return True
         
         return False
@@ -147,7 +147,7 @@ class Main:
         i = 0
         while True:
             try:
-                self.get_detection(next(self.generator), i) # Детекция объектов на следующем кадре
+                self.get_detection(next(self.generator), i, True) # Детекция объектов на следующем кадре
                 i+=1 
             except StopIteration:
                 self.resultVideo.release()
@@ -182,4 +182,4 @@ class Main:
         cv2.waitKey(1)
 # Точка входа в программу
 if __name__ == '__main__':
-    main = Main('1_cut.mp4')
+    main = Main()
