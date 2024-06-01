@@ -132,8 +132,8 @@ class Main:
     def __init__(self, path=None):
         self.camera = Camera()  # Инициализация камеры
         self.detector = Detector()  # Инициализация детектора
-        fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        self.resultVideo = cv2.VideoWriter('output.avi', fourcc, 30.0, (1280, 720))
+        fourcc = cv2.VideoWriter_fourcc(*'MP4V')
+        self.resultVideo = cv2.VideoWriter('output.mp4', fourcc, 20.0, (1920, 1080))
           # Получаем генератор изображений
         
         if path is None:
@@ -155,17 +155,26 @@ class Main:
         cv2.destroyAllWindows()
     def video_spin(self):
         i = 0
+        count = 0
         while True:
             frame = self.video.get_frame()
             if frame is False:
                 self.resultVideo.release()
                 break
-            self.get_detection(frame, i)
+            if count == 9:
+                self.get_detection(frame, i, True)
+                count = 0
+            else:
+                self.get_detection(frame, i, False)
+            count += 1
             i+=1
         cv2.destroyAllWindows()
 
-    def get_detection(self, frame, i):
-        detected_frame = self.detector.detection(frame)  # Детекция объектов на следующем кадре
+    def get_detection(self, frame, i, status):
+        if status:
+            detected_frame = self.detector.detection(frame) # Детекция объектов на следующем кадре
+        else:
+            detected_frame = frame 
         cv2.imshow('image', detected_frame)  # Отображаем изображение
         cv2.imwrite(f'results7/{i}.jpg', detected_frame)
         self.resultVideo.write(detected_frame)  # Сохраняем результат
@@ -173,4 +182,4 @@ class Main:
         cv2.waitKey(1)
 # Точка входа в программу
 if __name__ == '__main__':
-    main = Main()
+    main = Main('1_cut.mp4')
