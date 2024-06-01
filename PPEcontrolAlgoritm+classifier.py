@@ -62,10 +62,11 @@ class Detector:
         width = xmax-xmin
         height = ymax-ymin
         minDim = min(width, height)
-        if hatDist <= minDim*0.4:
+        maxDim = max(width, height)
+        if hatDist <= (minDim/2)*0.3:
             return True
         
-        if (hatCenter[1] > personCenter[1]) and abs(hatCenter[0]-personCenter[0]) < minDim*0.2:
+        if (hatCenter[1] > personCenter[1]) and abs(hatCenter[0]-personCenter[0]) > (maxDim/2)*0.5:
             return True
         
         return False
