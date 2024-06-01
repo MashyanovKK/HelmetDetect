@@ -56,17 +56,22 @@ class Detector:
         return frame
 
     def check_top(self, person, hatCenter):
+        
         xmin, ymin, xmax, ymax = person[0], person[1], person[2], person[3]
+
         personCenter = [xmin + (xmax-xmin)/2, ymin + (ymax-ymin)/2]
-        hatDist = ((hatCenter[0]+personCenter[0])**2+(hatCenter[1]+personCenter[1])**2)**0.5
+        # print(personCenter, hatCenter)
+        hatDist = ((hatCenter[0]-personCenter[0])**2 + (hatCenter[1]-personCenter[1])**2)**0.5
+        # print(hatDist)
         width = xmax-xmin
         height = ymax-ymin
         minDim = min(width, height)
         maxDim = max(width, height)
-        if hatDist <= (minDim/2)*0.1:
+        
+        if hatDist <= (minDim/2)*0.4:
             return True
         
-        if (hatCenter[1] > personCenter[1]) and (abs(hatCenter[0]-personCenter[0]) > (maxDim/2)*0.5):
+        if (hatCenter[1] < personCenter[1]) and (abs(hatCenter[1]-personCenter[1]) >= (maxDim/2)*0.3):
             return True
         
         return False
@@ -84,11 +89,12 @@ class Detector:
             for person in detections[0]:
                 helmets = []
                 personCenter = person[0] + (person[2] - person[0]) / 2, person[1] + (person[3] - person[1]) / 2
+                cv2.circle(frame, (int(personCenter[0]), int(personCenter[1])), 1, (255,255,0), 3)
                 for helmet in detections[1]:
                     helmetCenter = (helmet[0] + (helmet[2] - helmet[0]) / 2, helmet[1] + (helmet[3] - helmet[1]) / 2)
                     helmetDist = np.sqrt((personCenter[0] - helmetCenter[0]) ** 2 + (personCenter[1] - helmetCenter[1]) ** 2)
                     helmets.append(helmet.copy() + [helmetDist])
-
+                    cv2.circle(frame, (int(helmetCenter[0]), int(helmetCenter[1])), 1, (255,0,0), 3)
                 helmets = sorted(helmets, key=lambda x: x[5], reverse=False)
                 helmet = helmets[0]
                 helmetCenter = (helmet[0] + (helmet[2] - helmet[0]) / 2, helmet[1] + (helmet[3] - helmet[1]) / 2)
@@ -99,25 +105,25 @@ class Detector:
                 else:
                     # Если каска не находится внутри прямоугольника человека, рисуем красный прямоугольник и запускаем дополнительный классификатор YOLO
   
-                    # helmet_frame = frame[person[1]:person[3], person[0]:person[2]]  # Извлекаем регион интереса (ROI)
-                    # helmet_frame_height,helmet_frame_width  = helmet_frame.shape[:2]
+                    helmet_frame = frame[person[1]:person[3], person[0]:person[2]]  # Извлекаем регион интереса (ROI)
+                    helmet_frame_height,helmet_frame_width  = helmet_frame.shape[:2]
 
-                    # new_person = [0,0,helmet_frame_width, helmet_frame_height]
-                    # helmet_detections = self.model(helmet_frame, verbose=False)[0]  # Выполняем детекцию на ROI
-                    # helmet_detected = helmet_detections.boxes.data.tolist()
-                    # for helmet_data in helmet_detected:
-                    #     if helmet_data[4] >= self.CONFIDENCE_THRESHOLD and int(helmet_data[5]) == 1:
-                    #         # Если каска найдена в ROI, рисуем зеленый прямоугольник
-                    #         xmin, ymin, xmax, ymax = int(helmet_data[0]), int(helmet_data[1]), int(helmet_data[2]), int(helmet_data[3])
-                    #         helmetCenter = (xmin+ (xmax -xmin) / 2, ymin + (ymax - ymin) / 2)
-                    #         if self.check_top(new_person, helmetCenter):
-                    #             cv2.rectangle(frame, (person[0], person[1]), (person[2], person[3]), green, 2)
-                    #             cv2.putText(frame, f'{self.keyDict[0]}, confidence: {round(float(person[4]),2)}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, green, 2)
-                    #             break 
-                    # else:
+                    new_person = [0,0,helmet_frame_width, helmet_frame_height]
+                    helmet_detections = self.model(helmet_frame, verbose=False)[0]  # Выполняем детекцию на ROI
+                    helmet_detected = helmet_detections.boxes.data.tolist()
+                    for helmet_data in helmet_detected:
+                        if helmet_data[4] >= self.CONFIDENCE_THRESHOLD and int(helmet_data[5]) == 1:
+                            # Если каска найдена в ROI, рисуем зеленый прямоугольник
+                            xmin, ymin, xmax, ymax = int(helmet_data[0]), int(helmet_data[1]), int(helmet_data[2]), int(helmet_data[3])
+                            helmetCenter = (xmin+ (xmax -xmin) / 2, ymin + (ymax - ymin) / 2)
+                            if self.check_top(new_person, helmetCenter):
+                                cv2.rectangle(frame, (person[0], person[1]), (person[2], person[3]), green, 2)
+                                cv2.putText(frame, f'{self.keyDict[0]}, confidence: {round(float(person[4]),2)}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, green, 2)
+                                break 
+                    else:
                         # Если каска не найдена, рисуем красный прямоугольник
-                        cv2.rectangle(frame, (person[0], person[1]), (person[2], person[3]), green, 2)
-                        cv2.putText(frame, f'{self.keyDict[0]}, confidence: {round(float(person[4]),2)}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, green, 2)
+                        cv2.rectangle(frame, (person[0], person[1]), (person[2], person[3]), red, 2)
+                        cv2.putText(frame, f'{self.keyDict[0]}, confidence: {round(float(person[4]),2)}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, red, 2)
         return frame       
 
 
