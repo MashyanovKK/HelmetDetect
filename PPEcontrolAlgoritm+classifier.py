@@ -97,6 +97,7 @@ class Detector:
                     cv2.putText(frame, f'{self.keyDict[0]}, confidence: {round(float(person[4]),2)}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, green, 2)
                 else:
                     # Если каска не находится внутри прямоугольника человека, рисуем красный прямоугольник и запускаем дополнительный классификатор YOLO
+  
                     helmet_frame = frame[person[1]:person[3], person[0]:person[2]]  # Извлекаем регион интереса (ROI)
                     helmet_frame_height,helmet_frame_width  = helmet_frame.shape[:2]
 
@@ -111,11 +112,11 @@ class Detector:
                             if self.check_top(new_person, helmetCenter):
                                 cv2.rectangle(frame, (person[0], person[1]), (person[2], person[3]), green, 2)
                                 cv2.putText(frame, f'{self.keyDict[0]}, confidence: {round(float(person[4]),2)}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, green, 2)
-                                break
+                                break 
                     else:
                         # Если каска не найдена, рисуем красный прямоугольник
-                        cv2.rectangle(frame, (person[0], person[1]), (person[2], person[3]), red, 2)
-                        cv2.putText(frame, f'{self.keyDict[0]}, confidence: {round(float(person[4]),2)}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, red, 2)
+                        cv2.rectangle(frame, (person[0], person[1]), (person[2], person[3]), green, 2)
+                        cv2.putText(frame, f'{self.keyDict[0]}, confidence: {round(float(person[4]),2)}', (person[0], person[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, green, 2)
         return frame       
 
 
@@ -159,7 +160,7 @@ class Main:
     def get_detection(self, frame, i):
         detected_frame = self.detector.detection(frame)  # Детекция объектов на следующем кадре
         cv2.imshow('image', detected_frame)  # Отображаем изображение
-        cv2.imwrite(f'results/{i}.jpg', detected_frame)
+        cv2.imwrite(f'results7/{i}.jpg', detected_frame)
         self.resultVideo.write(detected_frame)  # Сохраняем результат
         i += 1
         cv2.waitKey(1)
